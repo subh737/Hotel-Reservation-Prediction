@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pradhan Heritage — Reservation Ledger</title>
+
+<!-- Display face: Fraunces (warm, ink-stamp serif personality) / Body: Inter / Data face: JetBrains Mono for ledger numerals -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root{
+  --ink:        #0A1A2B;   /* near-black navy, body text on light */
+  --navy:       #102C46;   /* primary deep navy */
+  --navy-deep:  #081421;   /* darkest panel / hero base */
+  --gold:       #C8A968;   /* champagne gold accent */
+  --gold-soft:  #E4D4AC;   /* pale gold for hairlines/highlights */
+  --ivory:      #F6F1E7;   /* warm paper background */
+  --ivory-2:    #EFE7D6;   /* slightly deeper paper, cards */
+  --clay:       #9C6B4F;   /* warm stamp-red/clay for "at risk" */
+  --sage:       #5C7A63;   /* confirmed/safe accent */
+
+  --serif:  'Fraunces', serif;
+  --sans:   'Inter', sans-serif;
+  --mono:   'JetBrains Mono', monospace;
+
+  --radius: 2px;
+  --container: 1180px;
+}
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html{ scroll-behavior:smooth; }
+
+body{
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--ivory);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+img{ max-width:100%; display:block; }
+
+a{ color:inherit; text-decoration:none; }
+
+.container{
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+:focus-visible{
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+.nav{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--navy-deep);
+  border-bottom: 1px solid rgba(200,169,104,0.25);
+}
+.nav .container{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  height: 74px;
+}
+.brand{
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.3rem;
+  color: var(--ivory);
+  letter-spacing: 0.02em;
+}
+.brand span{ color: var(--gold); }
+.nav-links{
+  display:flex;
+  gap: 36px;
+  list-style:none;
+  font-size: 0.86rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(246,241,231,0.75);
+}
+.nav-links li a{ transition: color 0.2s ease; }
+.nav-links li a:hover{ color: var(--gold); }
+.nav-links{ display:none; }
+@media (min-width: 860px){
+  .nav-links{ display:flex; }
+}
+
+/* ============================================================
+   HERO  — full-bleed image placeholder + headline
+   ============================================================ */
+.hero{
+  position: relative;
+  min-height: 86vh;
+  display:flex;
+  align-items:flex-end;
+  background:
+    linear-gradient(180deg, rgba(8,20,33,0.35) 0%, rgba(8,20,33,0.65) 55%, rgba(8,20,33,0.92) 100%),
+    /* === Replace this background-image URL with your hero photograph === */
+    url('https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=1800&auto=format&fit=crop') center/cover no-repeat;
+  background-color: var(--navy-deep); /* fallback while image loads */
+}
+.hero-content{
+  position: relative;
+  width: 100%;
+  padding: 90px 0 64px;
+  color: var(--ivory);
+}
+.hero-eyebrow{
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.hero-eyebrow::before{
+  content:"";
+  width: 34px;
+  height: 1px;
+  background: var(--gold);
+}
+.hero h1{
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(2.6rem, 6vw, 5rem);
+  line-height: 1.04;
+  max-width: 14ch;
+  letter-spacing: -0.01em;
+}
+.hero h1 em{
+  font-style: italic;
+  font-weight: 500;
+  color: var(--gold-soft);
+}
+.hero p{
+  margin-top: 22px;
+  max-width: 46ch;
+  font-size: 1.05rem;
+  color: rgba(246,241,231,0.82);
+}
+.hero-meta{
+  display:flex;
+  gap: 40px;
+  margin-top: 46px;
+  flex-wrap: wrap;
+}
+.hero-meta div{ border-left: 1px solid rgba(200,169,104,0.4); padding-left: 16px; }
+.hero-meta strong{
+  display:block;
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  color: var(--ivory);
+}
+.hero-meta span{
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(246,241,231,0.6);
+}
+
+/* ============================================================
+   SECTION HEADERS (shared)
+   ============================================================ */
+.section-head{
+  text-align:center;
+  max-width: 620px;
+  margin: 0 auto 56px;
+}
+.section-head .eyebrow{
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--clay);
+  margin-bottom: 14px;
+}
+.section-head h2{
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+  color: var(--navy);
+}
+.section-head p{
+  margin-top: 14px;
+  color: #5B6B73;
+  font-size: 0.98rem;
+}
+
+/* ============================================================
+   LEDGER / BOOKING WIDGET — signature element
+   The reservation form is styled as a hotel ledger card with
+   a perforated stub, ink-ruled fields and stamped numerals —
+   tying the "prediction" output to a classic hotel register.
+   ============================================================ */
+.ledger-section{
+  background: var(--ivory);
+  padding: 96px 0 110px;
+}
+
+.ledger{
+  background: #FFFDF8;
+  border: 1px solid rgba(16,44,70,0.12);
+  border-radius: var(--radius);
+  box-shadow: 0 30px 60px -30px rgba(10,26,43,0.25);
+  overflow: hidden;
+}
+
+.ledger-head{
+  background: var(--navy);
+  color: var(--ivory);
+  padding: 30px 44px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  position: relative;
+}
+.ledger-head::after{
+  /* perforation row between header and body */
+  content:"";
+  position:absolute;
+  left:0; right:0; bottom:-1px;
+  height: 1px;
+  background-image: radial-gradient(circle, var(--ivory) 2.5px, transparent 2.6px);
+  background-size: 16px 1px;
+  background-repeat: repeat-x;
+  background-position: center;
+}
+.ledger-head h3{
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 1.5rem;
+}
+.ledger-head .folio{
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--gold-soft);
+  letter-spacing: 0.06em;
+}
+
+.ledger-body{ padding: 48px 44px 44px; }
+
+.field-grid{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px 28px;
+}
+.field-grid.cols-2{ grid-template-columns: repeat(2, 1fr); }
+.field-grid.cols-4{ grid-template-columns: repeat(4, 1fr); }
+
+@media (max-width: 880px){
+  .field-grid, .field-grid.cols-2, .field-grid.cols-4{
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 560px){
+  .field-grid, .field-grid.cols-2, .field-grid.cols-4{
+    grid-template-columns: 1fr;
+  }
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap: 8px;
+}
+.field label{
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6B5A3E;
+}
+.field input,
+.field select{
+  font-family: var(--sans);
+  font-size: 0.98rem;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid rgba(16,44,70,0.25);
+  padding: 9px 2px 10px;
+  transition: border-color 0.2s ease;
+  appearance: none;
+}
+.field select{
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23102C46' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 2px center;
+  padding-right: 18px;
+}
+.field input:focus,
+.field select:focus{
+  border-bottom-color: var(--gold);
+}
+.field input::placeholder{ color: #A9B2B7; }
+
+.divider-row{
+  display:flex;
+  align-items:center;
+  gap: 14px;
+  margin: 38px 0 30px;
+  color: #9C6B4F;
+}
+.divider-row::before, .divider-row::after{
+  content:"";
+  flex:1;
+  height:1px;
+  background: repeating-linear-gradient(to right, rgba(16,44,70,0.2) 0 6px, transparent 6px 11px);
+}
+.divider-row span{
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ledger-submit{
+  margin-top: 44px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.ledger-submit .hint{
+  font-size: 0.85rem;
+  color: #6B7780;
+  max-width: 38ch;
+}
+
+.btn-stamp{
+  font-family: var(--mono);
+  font-size: 0.84rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ivory);
+  background: var(--navy);
+  border: 1.5px solid var(--navy);
+  padding: 16px 34px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+.btn-stamp:hover{
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--navy-deep);
+  transform: translateY(-1px);
+}
+
+/* ============================================================
+   PREDICTION RESULT — ink-stamp verdict card
+   ============================================================ */
+.verdict{
+  margin-top: 40px;
+  border: 1.5px dashed rgba(16,44,70,0.25);
+  border-radius: var(--radius);
+  padding: 30px 36px;
+  display:flex;
+  align-items:center;
+  gap: 26px;
+  flex-wrap: wrap;
+}
+.verdict.risk{
+  border-color: rgba(156,107,79,0.5);
+  background: rgba(156,107,79,0.06);
+}
+.verdict.safe{
+  border-color: rgba(92,122,99,0.5);
+  background: rgba(92,122,99,0.07);
+}
+.stamp{
+  font-family: var(--serif);
+  font-weight: 600;
+  font-style: italic;
+  font-size: 1.2rem;
+  letter-spacing: 0.04em;
+  border: 3px solid currentColor;
+  border-radius: 999px;
+  padding: 14px 22px;
+  transform: rotate(-6deg);
+  white-space: nowrap;
+}
+.verdict.risk .stamp{ color: var(--clay); }
+.verdict.safe .stamp{ color: var(--sage); }
+.verdict-text h4{
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  margin-bottom: 4px;
+  color: var(--navy);
+}
+.verdict-text p{ color: #5B6B73; font-size: 0.92rem; }
+
+/* ============================================================
+   FEATURES STRIP — what the ledger considers
+   ============================================================ */
+.features{
+  background: var(--navy-deep);
+  padding: 78px 0;
+  color: var(--ivory);
+}
+.features .container{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 36px;
+}
+@media (max-width: 880px){
+  .features .container{ grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 520px){
+  .features .container{ grid-template-columns: 1fr; }
+}
+.feature .mark{
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--gold);
+  margin-bottom: 14px;
+  display:block;
+}
+.feature h4{
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  margin-bottom: 8px;
+}
+.feature p{
+  font-size: 0.88rem;
+  color: rgba(246,241,231,0.65);
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer{
+  background: var(--ivory-2);
+  padding: 40px 0;
+  border-top: 1px solid rgba(16,44,70,0.1);
+}
+footer .container{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+footer p{
+  font-size: 0.8rem;
+  color: #6B7780;
+  letter-spacing: 0.02em;
+}
+footer .brand{ color: var(--navy); font-size: 1.05rem; }
+
+</style>
+</head>
+<body>
+
+<!-- ============ NAVBAR ============ -->
+<nav class="nav">
+  <div class="container">
+    <div class="brand"><span>Pradhan </span>Heritage</div>
+    <ul class="nav-links">
+      <li><a href="#book">Reservation Ledger</a></li>
+      <li><a href="#about">The House</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="container hero-content">
+    <div class="hero-eyebrow">Front Desk &amp; Reservation Intelligence</div>
+    <h1>Every stay, <em>read</em> before it's written.</h1>
+    <p>Pradhan Heritage's front desk uses a quiet bit of arithmetic behind every booking — estimating, from the details of a reservation, how likely it is to be honoured.</p>
+    <div class="hero-meta">
+      <div><strong>2003</strong><span>Established</span></div>
+      <div><strong>7</strong><span>Room Categories</span></div>
+      <div><strong>24/7</strong><span>Front Desk</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ BOOKING / LEDGER FORM ============ -->
+<section class="ledger-section" id="book">
+  <div class="container">
+
+    <div class="section-head">
+      <div class="eyebrow">Reservation Ledger</div>
+      <h2>Enter the particulars of the stay</h2>
+      <p>Fill the ledger as the guest has booked it. Hotel Meridian's model will read the entry and return its assessment.</p>
+    </div>
+
+    <div class="ledger">
+      <div class="ledger-head">
+        <h3>Guest Folio</h3>
+        <div class="folio">Folio No. — Pending</div>
+      </div>
+
+      <div class="ledger-body">
+        <form action="/predict" method="POST" id="reservation-form">
+
+          <!-- Stay window -->
+          <div class="divider-row"><span>Stay Window</span></div>
+          <div class="field-grid cols-4">
+            <div class="field">
+              <label for="arrival_month">Arrival Month</label>
+              <select id="arrival_month" name="arrival_month" required>
+                <option value="" disabled selected>Select month</option>
+                <option value="January">January</option>
+                <option value="February">February</option>
+                <option value="March">March</option>
+                <option value="April">April</option>
+                <option value="May">May</option>
+                <option value="June">June</option>
+                <option value="July">July</option>
+                <option value="August">August</option>
+                <option value="September">September</option>
+                <option value="October">October</option>
+                <option value="November">November</option>
+                <option value="December">December</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="arrival_date">Arrival Date</label>
+              <select id="arrival_date" name="arrival_date" required>
+                <option value="" disabled selected>Select date</option>
+                {% for i in range(1, 32) %}
+                  <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="no_of_weekend_nights">Weekend Nights</label>
+              <input type="number" min="0" id="no_of_weekend_nights" name="no_of_weekend_nights" placeholder="0" required>
+            </div>
+
+            <div class="field">
+              <label for="no_of_week_nights">Week Nights</label>
+              <input type="number" min="0" id="no_of_week_nights" name="no_of_week_nights" placeholder="0" required>
+            </div>
+          </div>
+
+          <!-- Party -->
+          <div class="divider-row"><span>The Party</span></div>
+          <div class="field-grid cols-4">
+            <div class="field">
+              <label for="no_of_adults">Adults</label>
+              <input type="number" min="1" id="no_of_adults" name="no_of_adults" placeholder="1" required>
+            </div>
+
+            <div class="field">
+              <label for="no_of_children">Children</label>
+              <input type="number" min="0" id="no_of_children" name="no_of_children" placeholder="0" required>
+            </div>
+
+            <div class="field">
+              <label for="no_of_special_request">Special Requests</label>
+              <input type="number" min="0" id="no_of_special_request" name="no_of_special_request" placeholder="0" required>
+            </div>
+
+            <div class="field">
+              <label for="required_car_parking_space">Parking Space</label>
+              <select id="required_car_parking_space" name="required_car_parking_space" required>
+                <option value="" disabled selected>Select</option>
+                <option value="1">Required</option>
+                <option value="0">Not required</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Room & rate -->
+          <div class="divider-row"><span>Room &amp; Rate</span></div>
+          <div class="field-grid">
+            <div class="field">
+              <label for="room_type_reserved">Room Type</label>
+              <select id="room_type_reserved" name="room_type_reserved" required>
+                <option value="" disabled selected>Select room type</option>
+                <option value="Room Type 1">Room Type 1</option>
+                <option value="Room Type 2">Room Type 2</option>
+                <option value="Room Type 3">Room Type 3</option>
+                <option value="Room Type 4">Room Type 4</option>
+                <option value="Room Type 5">Room Type 5</option>
+                <option value="Room Type 6">Room Type 6</option>
+                <option value="Room Type 7">Room Type 7</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="type_of_meal_plan">Meal Plan</label>
+              <select id="type_of_meal_plan" name="type_of_meal_plan" required>
+                <option value="" disabled selected>Select meal plan</option>
+                <option value="Meal Plan 1">Meal Plan 1</option>
+                <option value="Meal Plan 2">Meal Plan 2</option>
+                <option value="Meal Plan 3">Meal Plan 3</option>
+                <option value="Not Selected">Not Selected</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="avg_price_per_room">Avg. Price / Room</label>
+              <input type="number" step="0.01" min="0" id="avg_price_per_room" name="avg_price_per_room" placeholder="0.00" required>
+            </div>
+          </div>
+
+          <!-- Booking origin -->
+          <div class="divider-row"><span>Booking Origin</span></div>
+          <div class="field-grid cols-2">
+            <div class="field">
+              <label for="market_segment_type">Market Segment</label>
+              <select id="market_segment_type" name="market_segment_type" required>
+                <option value="" disabled selected>Select segment</option>
+                <option value="Aviation">Aviation</option>
+                <option value="Complimentary">Complimentary</option>
+                <option value="Corporate">Corporate</option>
+                <option value="Offline">Offline</option>
+                <option value="Online">Online</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="lead_time">Lead Time (Days)</label>
+              <input type="number" min="0" id="lead_time" name="lead_time" placeholder="Days booked in advance" required>
+            </div>
+          </div>
+
+          <div class="ledger-submit">
+            <p class="hint">Submitting reads this folio against the reservation model and returns a cancellation assessment below.</p>
+            <button class="btn-stamp" type="submit">Assess Reservation</button>
+          </div>
+
+        </form>
+
+        <!-- ============ PREDICTION RESULT ============ -->
+        {% if prediction is not none %}
+        <div class="verdict {% if prediction == 0 %}risk{% elif prediction == 1 %}safe{% endif %}">
+          <div class="stamp">
+            {% if prediction == 0 %}AT RISK{% elif prediction == 1 %}CONFIRMED{% endif %}
+          </div>
+          <div class="verdict-text">
+            <h4>
+              {% if prediction == 0 %}
+                Likely to cancel
+              {% elif prediction == 1 %}
+                Likely to honour the booking
+              {% endif %}
+            </h4>
+            <p>
+              {% if prediction == 0 %}
+                The ledger entry resembles past reservations that did not result in a stay. Consider a confirmation call or deposit.
+              {% elif prediction == 1 %}
+                The ledger entry resembles past reservations that were honoured as booked. No further action needed.
+              {% endif %}
+            </p>
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES / WHAT THE MODEL READS ============ -->
+<section class="features" id="about">
+  <div class="container">
+    <div class="feature">
+      <span class="mark">01</span>
+      <h4>Lead time</h4>
+      <p>Bookings made far in advance behave differently from same-week reservations.</p>
+    </div>
+    <div class="feature">
+      <span class="mark">02</span>
+      <h4>Rate &amp; room</h4>
+      <p>Average nightly rate and room category, weighed against the season booked.</p>
+    </div>
+    <div class="feature">
+      <span class="mark">03</span>
+      <h4>Origin of booking</h4>
+      <p>Corporate, online, offline, and complimentary stays cancel at different rates.</p>
+    </div>
+    <div class="feature">
+      <span class="mark">04</span>
+      <h4>Guest intent</h4>
+      <p>Special requests and parking needs are small signals of a firmer commitment.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer id="contact">
+  <div class="container">
+    <div class="brand">Pradhan Heritage</div>
+    <p>Reservation ledger &amp; prediction interface — for internal front-desk use.</p>
+  </div>
+</footer>
+
+</body>
+</html>
