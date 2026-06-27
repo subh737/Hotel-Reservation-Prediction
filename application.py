@@ -1,4 +1,5 @@
 import joblib
+import os
 import numpy as np
 from config.paths_config import MODEL_OUTPUT_PATH
 from flask import Flask, render_template, request
@@ -94,4 +95,6 @@ def predict():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    # This automatically grabs the port from Render, or defaults to 5000 locally
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
