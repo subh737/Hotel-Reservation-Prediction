@@ -222,13 +222,3 @@ docker run -p 5000:5000 hotel-reservation-app
 - Set up model drift monitoring in production.
 
 ---
-
-## 📄 License
-
-This project is licensed under the MIT License — feel free to use and adapt it.
-
----
-
-## 🙋 Author
-
-Built by **Subham** — B.Tech student specializing in AI/ML/DS, passionate about building end-to-end, production-grade machine learning systems.
