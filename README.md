@@ -41,9 +41,8 @@ The system is engineered as a complete **MLOps pipeline** — from data ingestio
 |---|---|
 | **Accuracy** | **86.37%** |
 | **F1-Score** | **86.77%** |
-| Precision | _TBD_ |
-| Recall | _TBD_ |
-| ROC-AUC | _TBD_ |
+| **Precision** |  **84.93%** |
+| **Recall** |  **88.69%** |
 
 > Metrics are logged automatically via MLflow on every training run for full reproducibility and comparison across experiments.
 
