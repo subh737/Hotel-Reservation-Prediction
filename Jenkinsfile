@@ -20,7 +20,7 @@ pipeline {
             }
         }
 
-        stage('Setting up our Virtual Environment and Installing dependencies') {
+       stage('Setting up our Virtual Environment and Installing dependencies') {
             steps {
                 script {
                     echo 'Setting up our Virtual Environment and Installing dependencies............'
@@ -29,6 +29,9 @@ pipeline {
                     . ${VENV_DIR}/bin/activate
                     pip install --upgrade pip
                     pip install -e .
+                    
+                    # Train the model right here in Jenkins!
+                    python pipeline/training_pipeline.py
                     '''
                 }
             }
@@ -55,6 +58,23 @@ pipeline {
             }
         }
 
-        
+        stage('Deploy to Google Cloud Run') {
+            steps {
+                script {
+                    echo 'Deploy to Google Cloud Run.............'
+                    sh '''
+                    # 1. Ensure the project is set
+                    gcloud config set project ${GCP_PROJECT}
+
+                    # 2. Deploy directly to Cloud Run
+                    gcloud run deploy ml-project \
+                        --image=gcr.io/${GCP_PROJECT}/ml-project:latest \
+                        --platform=managed \
+                        --region=us-central1 \
+                        --allow-unauthenticated
+                    '''
+                }
+            }
+        }
     }
 }

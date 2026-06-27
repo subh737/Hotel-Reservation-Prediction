@@ -13,15 +13,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the application code
+# Copy the application code (this will include the model files Jenkins creates!)
 COPY . .
 
 # Install the package in editable mode
 RUN pip install --no-cache-dir -e .
 
-# Train the model before running the application
-RUN python pipeline/training_pipeline.py
-
 EXPOSE 5000
 
+# Just start the app!
 CMD ["python", "application.py"]
