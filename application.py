@@ -95,6 +95,7 @@ def predict():
 
 
 if __name__ == "__main__":
-    # This automatically grabs the port from Render, or defaults to 5000 locally
-    port = int(os.environ.get("PORT", 5000))
+    # If an environment variable 'PORT' exists (like on Render), use it. 
+    # Otherwise, default to 8080 so it runs locally.
+    port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=False)
