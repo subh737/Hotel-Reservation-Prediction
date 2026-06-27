@@ -1,26 +1,31 @@
-pipeline{
+pipeline {
     agent any
 
     environment {
         VENV_DIR = 'venv'
+        GCP_PROJECT = "project-0495f0cf-4319-450f-a85" 
     }
 
-    stages{
-        stage('Cloning Github repo to Jenkins'){
-            steps{
-                script{
+    stages {
+        stage('Cloning Github repo to Jenkins') {
+            steps {
+                script {
                     echo 'Cloning Github repo to Jenkins............'
-                    checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'github-token', url: 'https://github.com/subh737/Hotel-Reservation-Prediction.git']])
+                    checkout scmGit(
+                        branches: [[name: '*/main']], 
+                        extensions: [], 
+                        userRemoteConfigs: [[credentialsId: 'github-token', url: 'https://github.com/subh737/Hotel-Reservation-Prediction.git']]
+                    )
                 }
             }
         }
 
-        stage('Setting up our Virtual Environment and Installing dependancies'){
-            steps{
-                script{
-                    echo 'Setting up our Virtual Environment and Installing dependancies............'
+        stage('Setting up our Virtual Environment and Installing dependencies') {
+            steps {
+                script {
+                    echo 'Setting up our Virtual Environment and Installing dependencies............'
                     sh '''
-                    python -m venv ${VENV_DIR}
+                    python3 -m venv ${VENV_DIR}
                     . ${VENV_DIR}/bin/activate
                     pip install --upgrade pip
                     pip install -e .
@@ -28,6 +33,28 @@ pipeline{
                 }
             }
         }
+
+        stage('Building and Pushing Docker Image to GCR') {
+            steps {
+                script {
+                    echo 'Building and Pushing Docker Image to GCR.............'
+                    sh '''
+                    # 1. Set the correct GCP project
+                    gcloud config set project ${GCP_PROJECT}
+
+                    # 2. Tell Docker to use gcloud for authentication
+                    gcloud auth configure-docker --quiet
+
+                    # 3. Build the Docker image
+                    docker build -t gcr.io/${GCP_PROJECT}/ml-project:latest .
+
+                    # 4. Push the image to Google Container Registry
+                    docker push gcr.io/${GCP_PROJECT}/ml-project:latest 
+                    '''
+                }
+            }
+        }
+
         
     }
 }
