@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 import pandas as pd
 from google.cloud import storage
 from sklearn.model_selection import train_test_split
@@ -13,7 +14,7 @@ logger = get_logger(__name__)
 
 
 class DataIngestion:
-    def __init__(self,config):
+    def __init__(self, config):
         self.config = config["data_ingestion"]
         self.bucket_name = self.config["bucket_name"]
         self.file_name = self.config["bucket_file_name"]
@@ -25,14 +26,26 @@ class DataIngestion:
 
     def download_csv_from_gcp(self):
         try:
+            logger.info("Attempting to download dataset from Google Cloud Storage...")
             client = storage.Client(project=self.config["project_id"])
             bucket = client.bucket(self.bucket_name)
             blob = bucket.blob(self.file_name)
             blob.download_to_filename(RAW_FILE_PATH)
             logger.info(f"CSV file is Successfully Downloaded {self.file_name} from GCP bucket {self.bucket_name} to {RAW_FILE_PATH}")
+            
         except Exception as e:
-            logger.error(f"Error downloading file from GCP: {str(e)}")
-            raise CustomException(f"Error downloading file from GCP: {str(e)}",sys)    
+            # FALLBACK MECHANISM: Catch the GCP billing error and use the local file instead
+            logger.warning(f"GCP download failed (likely due to active billing restrictions): {str(e)}")
+            logger.info("Initiating local fallback mechanism for CI/CD pipeline continuity...")
+
+            local_fallback_source = os.path.join("data", self.file_name)
+            
+            if os.path.exists(local_fallback_source):
+                shutil.copy(local_fallback_source, RAW_FILE_PATH)
+                logger.info(f"Successfully loaded local fallback dataset from {local_fallback_source}")
+            else:
+                logger.error(f"Local fallback failed. File not found at {local_fallback_source}")
+                raise CustomException("Critical Failure: Both GCP download and local fallback failed.", sys)    
         
 
     def split_data(self):
@@ -45,9 +58,8 @@ class DataIngestion:
             logger.info(f"Data successfully split into train and test sets with ratio {self.train_test_ratio}")
         except Exception as e:
             logger.error(f"Error splitting data: {str(e)}")
-            raise CustomException(f"Failed to split data into training and test sets: {str(e)}",sys)    
+            raise CustomException(f"Failed to split data into training and test sets: {str(e)}", sys)    
         
-
 
     def run(self):
         try:
@@ -57,7 +69,7 @@ class DataIngestion:
             logger.info("Data ingestion process completed successfully.")
         except Exception as e:
             logger.error(f"Data ingestion process failed: {str(e)}")
-            raise CustomException(f"Data ingestion process failed: {str(e)}",sys)    
+            raise CustomException(f"Data ingestion process failed: {str(e)}", sys)    
         
         finally:
             logger.info("Data ingestion process finished.")
