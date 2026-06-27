@@ -37,22 +37,19 @@ pipeline {
             }
         }
 
-        stage('Building and Pushing Docker Image to GCR') {
+        stage('Building Docker Image Locally') {
             steps {
                 script {
-                    echo 'Building and Pushing Docker Image to GCR.............'
+                    echo 'Building Docker Image Locally (Cloud Push Disabled).............'
                     sh '''
-                    # 1. Set the correct GCP project
-                    gcloud config set project ${GCP_PROJECT}
+                    # 1. Build the Docker image locally
+                    docker build -t ml-project:latest .
 
-                    # 2. Tell Docker to use gcloud for authentication
-                    gcloud auth configure-docker --quiet
-
-                    # 3. Build the Docker image
-                    docker build -t gcr.io/${GCP_PROJECT}/ml-project:latest .
-
-                    # 4. Push the image to Google Container Registry
-                    docker push gcr.io/${GCP_PROJECT}/ml-project:latest 
+                    # --- CLOUD DEPLOYMENT DISABLED FOR LOCAL RUN ---
+                    # gcloud config set project ${GCP_PROJECT}
+                    # gcloud auth configure-docker --quiet
+                    # docker tag ml-project:latest gcr.io/${GCP_PROJECT}/ml-project:latest
+                    # docker push gcr.io/${GCP_PROJECT}/ml-project:latest 
                     '''
                 }
             }
@@ -61,18 +58,19 @@ pipeline {
         stage('Deploy to Google Cloud Run') {
             steps {
                 script {
-                    echo 'Deploy to Google Cloud Run.............'
+                    echo 'Deploy to Google Cloud Run skipped for local testing.............'
+                    
+                    /* --- DEPLOYMENT DISABLED FOR LOCAL RUN ---
                     sh '''
-                    # 1. Ensure the project is set
                     gcloud config set project ${GCP_PROJECT}
 
-                    # 2. Deploy directly to Cloud Run
                     gcloud run deploy ml-project \
                         --image=gcr.io/${GCP_PROJECT}/ml-project:latest \
                         --platform=managed \
                         --region=us-central1 \
                         --allow-unauthenticated
                     '''
+                    */
                 }
             }
         }
