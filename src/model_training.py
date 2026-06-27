@@ -151,6 +151,26 @@ class ModelTraining:
             raise CustomException("Failed during model training pipeline" ,  e)
         
 if __name__=="__main__":
+    # --- MLFLOW ARTIFACT FIX ---
+    # 1. Create a local folder for artifacts
+    os.makedirs("mlruns", exist_ok=True)
+
+    # 2. Set the tracking URI to your local SQLite DB for metrics
+    mlflow.set_tracking_uri("sqlite:///mlflow.db")
+
+    # 3. Create/Set the experiment and explicitly link the local artifact folder
+    try:
+        mlflow.create_experiment(
+            "Hotel_Reservation_Experiment",
+            artifact_location=os.path.abspath("mlruns")
+        )
+    except mlflow.exceptions.MlflowException:
+        # Ignore the error if the experiment already exists from a previous run
+        pass
+
+    mlflow.set_experiment("Hotel_Reservation_Experiment")
+    # ---------------------------
+
     trainer = ModelTraining(PROCESSED_TRAIN_DATA_PATH,PROCESSED_TEST_DATA_PATH,MODEL_OUTPUT_PATH)
     trainer.run()
         
