@@ -123,6 +123,21 @@ class ModelTraining:
     
     def run(self):
         try:
+            # --- MLFLOW ARTIFACT FIX (Moved inside the execution method) ---
+            os.makedirs("mlruns", exist_ok=True)
+            mlflow.set_tracking_uri("sqlite:///mlflow.db")
+            
+            try:
+                mlflow.create_experiment(
+                    "Hotel_Reservation_Experiment",
+                    artifact_location=os.path.abspath("mlruns")
+                )
+            except mlflow.exceptions.MlflowException:
+                pass
+                
+            mlflow.set_experiment("Hotel_Reservation_Experiment")
+            # -------------------------------------------------------------
+
             with mlflow.start_run():
                 logger.info("Starting our Model Training pipeline")
 
